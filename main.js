@@ -1,7 +1,8 @@
 // controllables
 let particleCount = 100000,
-  particleResolution = 0.01,
-  grabDistance = 0.5;
+  particleResolution = 0.015,
+  grabDistance = window.innerWidth <= 768 ? 0.75 : 0.5;
+
 const minDistanceToCamera = 2;
 let orbitSpeed = 0.03;
 let spiralInwardSpeed = 10;
@@ -20,6 +21,80 @@ let raycaster = new THREE.Raycaster(),
   plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let initialPositions;
 
+// Helper function to create the GUI
+function createGUI() {
+  const gui = new dat.GUI();
+
+  const params = {
+    particleCount: 100000,
+    particleResolution: 0.01,
+    grabDistance: 0.5,
+    orbitSpeed: 0.02,
+    spiralInwardSpeed: 0.01,
+    color1: "#5432ff",
+    color2: "#3200ff",
+    color3: "#8b32ff",
+    color4: "#000000",
+    color5: "#ffffff",
+    reset: function () {
+      this.particleCount = 100000;
+      this.particleResolution = 0.01;
+      this.grabDistance = 0.5;
+      this.orbitSpeed = 0.02;
+      this.spiralInwardSpeed = 0.01;
+      this.color1 = "#5432ff";
+      this.color2 = "#3200ff";
+      this.color3 = "#8b32ff";
+      this.color4 = "#000000";
+      this.color5 = "#ffffff";
+      this.author = "Your Name";
+      this.contact = "example@gmail.com";
+      this.createdWith = "Three.js";
+    },
+  };
+
+  // Add folder for particle settings
+  const particleFolder = gui.addFolder("Particle Settings");
+  particleFolder.add(params, "particleCount", 100, 250000, 1).onChange(() => {
+    particleCount = params.particleCount;
+    updateParticleSystem();
+  });
+  particleFolder
+    .add(params, "particleResolution", 0.001, 0.1, 0.001)
+    .onChange(() => {
+      particleResolution = params.particleResolution;
+      updateParticleSystem();
+    });
+  particleFolder
+    .add(params, "grabDistance", 0.01, 5, 0.01)
+    .onChange(() => {
+      grabDistance = params.grabDistance;
+    });
+  particleFolder
+    .add(params, "orbitSpeed", 0.001, 0.1, 0.001)
+    .onChange(() => {
+      orbitSpeed = params.orbitSpeed;
+    });
+  particleFolder
+    .add(params, "spiralInwardSpeed", 0.001, 0.1, 0.001)
+    .onChange(() => {
+      spiralInwardSpeed = params.spiralInwardSpeed;
+    });
+
+  // Add folder for palette settings
+//   const paletteFolder = gui.addFolder("Palette Settings");
+//   paletteFolder.addColor(params, "color1");
+//   paletteFolder.addColor(params, "color2");
+//   paletteFolder.addColor(params, "color3");
+//   paletteFolder.addColor(params, "color4");
+//   paletteFolder.addColor(params, "color5");
+
+  // Add listener for changes
+  gui.remember(params);
+  gui.close();
+  gui.add(params, "reset").name("Reset All");
+}
+
 // Scene and camera setup
 function init() {
   scene = new THREE.Scene();
@@ -36,8 +111,11 @@ function init() {
   document.getElementById("container").appendChild(renderer.domElement);
 
   createParticleSystem();
-  window.addEventListener("mousemove", onMouseMove, false);
+  // add event listeners for both mouse and touch events
+  window.addEventListener("mousemove", onMouseMove);
+  window.addEventListener("touchmove", onMouseMove, { passive: false });
   animate();
+  createGUI();
 }
 
 function createParticleSystem() {
@@ -185,9 +263,6 @@ function animate() {
   const colors = particles.attributes.color.array;
   const positions = particles.attributes.position.array;
 
-  const attractorStrength = 0.05;
-  const orbitSpeed = 0.02;
-
   const tempParticle = new THREE.Vector3();
   const tempMousePos = new THREE.Vector3(mouseX, mouseY, 0.5);
   // Calculate matrixWorldInverse
@@ -223,13 +298,9 @@ function animate() {
   const paletteBox = document.getElementById("palette-box");
   paletteBox.style.backgroundColor = `rgb(${Math.round(
     palette[1].r * 255
-  )}, ${Math.round(palette[1].g * 255)}, ${Math.round(
-    palette[1].b * 255
-  )})`;
+  )}, ${Math.round(palette[1].g * 255)}, ${Math.round(palette[1].b * 255)})`;
 
-  document.getElementById(
-    "time-info"
-  ).textContent = `Time: ${timeString}`;
+  document.getElementById("time-info").textContent = `Time: ${timeString}`;
 
   for (let i = 0; i < positions.length; i += 3) {
     let particle = new THREE.Vector3(
@@ -297,8 +368,10 @@ function animate() {
 }
 
 function onMouseMove(event) {
-  mouseX = (event.clientX / window.innerWidth) * 2 - 1;
-  mouseY = -(event.clientY / window.innerHeight) * 2 + 1;
+  const x = event.clientX || event.touches[0].clientX;
+  const y = event.clientY || event.touches[0].clientY;
+  mouseX = (x / window.innerWidth) * 2 - 1;
+  mouseY = -(y / window.innerHeight) * 2 + 1;
 
   mousePos.set(mouseX, mouseY, 0.5);
   mousePos.unproject(camera);
@@ -336,26 +409,3 @@ function updateParticleSystem() {
 
 // Initialize the scene
 init();
-
-document.getElementById("toggleDrawer").addEventListener("click", () => {
-  document.getElementById("drawer").classList.toggle("open");
-});
-
-document.getElementById("update").addEventListener("click", () => {
-  particleCount = parseInt(document.getElementById("particleCount").value);
-  particleResolution = parseFloat(
-    document.getElementById("particleResolution").value
-  );
-  grabDistance = parseFloat(document.getElementById("grabDistance").value);
-  orbitSpeed = parseFloat(document.getElementById("orbitSpeed").value);
-  spiralInwardSpeed = parseFloat(
-    document.getElementById("spiralInwardSpeed").value
-  );
-
-  // Update the particle system with new values
-  updateParticleSystem();
-});
-
-document.getElementById("toggle-controls").addEventListener("click", () => {
-  document.getElementById("drawer").classList.toggle("open");
-});
