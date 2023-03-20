@@ -70,7 +70,7 @@ body {
 
 @media screen and (max-width: 600px) {
   #aboutMe {
-    top: 10px;
+    top: 30px;
     left: 0px;
     right: 0px;
     display: flex;
