@@ -2,12 +2,11 @@
 let particleCount = 100000,
   particleResolution = 0.015,
   grabDistance = window.innerWidth <= 768 ? 0.75 : 0.5;
-
-const minDistanceToCamera = 2;
 let orbitSpeed = 0.03;
 let spiralInwardSpeed = 10;
 const ejectDistance = 2.1;
 const ejectForce = 0.05;
+const minDistanceToCamera = 2;
 
 // Variables
 let scene, camera, renderer, geometry, material, mesh;
@@ -21,6 +20,72 @@ let raycaster = new THREE.Raycaster(),
   plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 let initialPositions;
 
+const palettes = [
+  [
+    new THREE.Color(0xff9f00), // Orange
+    new THREE.Color(0xff5200), // Darker orange
+    new THREE.Color(0xff2600), // Red-orange
+  ],
+  [
+    new THREE.Color(0x5432ff), // Blue
+    new THREE.Color(0x3200ff), // Darker blue
+    new THREE.Color(0x8b32ff), // Purple
+  ],
+  [
+    new THREE.Color(0xff0080),
+    new THREE.Color(0xff00ff),
+    new THREE.Color(0xff4080),
+  ],
+  [
+    new THREE.Color(0x66ffff),
+    new THREE.Color(0x003366),
+    new THREE.Color(0x99ccff),
+  ],
+  [
+    new THREE.Color(0xffcc00),
+    new THREE.Color(0xff6600),
+    new THREE.Color(0xffcc33),
+  ],
+  [
+    new THREE.Color(0x00bfff),
+    new THREE.Color(0x006699),
+    new THREE.Color(0x66ccff),
+  ],
+  [
+    new THREE.Color(0x6600ff),
+    new THREE.Color(0xff00ff),
+    new THREE.Color(0xff33cc),
+  ],
+  [
+    new THREE.Color(0xff00ff),
+    new THREE.Color(0xff6600),
+    new THREE.Color(0xffff00),
+  ],
+  [
+    new THREE.Color(0xff0000),
+    new THREE.Color(0xffff00),
+    new THREE.Color(0x00ff00),
+  ],
+  [
+    new THREE.Color(0x00ff00),
+    new THREE.Color(0xff0000),
+    new THREE.Color(0x0000ff),
+  ],
+  [
+    new THREE.Color(0xff0000),
+    new THREE.Color(0x00ffff),
+    new THREE.Color(0xffffff),
+  ],
+  [
+    new THREE.Color(0xff9933),
+    new THREE.Color(0xff6666),
+    new THREE.Color(0xff0000),
+  ],
+];
+// Choose a random palette at the start
+const paletteIndex = Math.floor(Math.random() * palettes.length);
+const palette = palettes[paletteIndex];
+console.log(palette);
 // Helper function to create the GUI
 function createGUI() {
   const gui = new dat.GUI();
@@ -31,25 +96,22 @@ function createGUI() {
     grabDistance: 0.5,
     orbitSpeed: 0.02,
     spiralInwardSpeed: 0.01,
-    color1: "#5432ff",
-    color2: "#3200ff",
-    color3: "#8b32ff",
-    color4: "#000000",
-    color5: "#ffffff",
+    palette,
+    paletteIndex,
+    palette_a: palette[0],
+    palette_b: palette[1],
+    palette_c: palette[2],
     reset: function () {
       this.particleCount = 100000;
       this.particleResolution = 0.01;
       this.grabDistance = 0.5;
       this.orbitSpeed = 0.02;
       this.spiralInwardSpeed = 0.01;
-      this.color1 = "#5432ff";
-      this.color2 = "#3200ff";
-      this.color3 = "#8b32ff";
-      this.color4 = "#000000";
-      this.color5 = "#ffffff";
-      this.author = "Your Name";
-      this.contact = "example@gmail.com";
-      this.createdWith = "Three.js";
+      this.palette = palette;
+      this.paletteIndex = paletteIndex;
+      this.palette_a = palette[0];
+      this.palette_b = palette[1];
+      this.palette_c = palette[2];
     },
   };
 
@@ -65,16 +127,12 @@ function createGUI() {
       particleResolution = params.particleResolution;
       updateParticleSystem();
     });
-  particleFolder
-    .add(params, "grabDistance", 0.01, 5, 0.01)
-    .onChange(() => {
-      grabDistance = params.grabDistance;
-    });
-  particleFolder
-    .add(params, "orbitSpeed", 0.001, 0.1, 0.001)
-    .onChange(() => {
-      orbitSpeed = params.orbitSpeed;
-    });
+  particleFolder.add(params, "grabDistance", 0.01, 5, 0.01).onChange(() => {
+    grabDistance = params.grabDistance;
+  });
+  particleFolder.add(params, "orbitSpeed", 0.001, 0.1, 0.001).onChange(() => {
+    orbitSpeed = params.orbitSpeed;
+  });
   particleFolder
     .add(params, "spiralInwardSpeed", 0.001, 0.1, 0.001)
     .onChange(() => {
@@ -82,12 +140,29 @@ function createGUI() {
     });
 
   // Add folder for palette settings
-//   const paletteFolder = gui.addFolder("Palette Settings");
-//   paletteFolder.addColor(params, "color1");
-//   paletteFolder.addColor(params, "color2");
-//   paletteFolder.addColor(params, "color3");
-//   paletteFolder.addColor(params, "color4");
-//   paletteFolder.addColor(params, "color5");
+  //   const paletteFolder = gui.addFolder("Palette Settings");
+  //   const paletteSelectionA = paletteFolder
+  //     .addColor(params, "palette_a")
+  //     .onChange((colorValue) => {
+  //       console.log(colorValue);
+  //       let colorObject = new THREE.Color(colorValue);
+  //       palette[0] = colorObject;
+  //       //updateParticleSystem();
+  //     });
+  //   const paletteSelectionB = paletteFolder
+  //     .addColor(params, "palette_b")
+  //     .onChange((colorValue) => {
+  //       let colorObject = new THREE.Color(colorValue);
+  //       palette[1] = colorObject;
+  //       //updateParticleSystem();
+  //     });
+  //   const paletteSelectionC = paletteFolder
+  //     .addColor(params, "palette_c")
+  //     .onChange((colorValue) => {
+  //       let colorObject = new THREE.Color(colorValue);
+  //       palette[2] = colorObject;
+  //       console.log(palette)
+  //     });
 
   // Add listener for changes
   gui.remember(params);
@@ -120,15 +195,6 @@ function init() {
 
 function createParticleSystem() {
   particles = new THREE.BufferGeometry();
-  //   particleMaterial = new THREE.PointsMaterial({
-  //     map: createBlobTexture(),
-  //     size: particleResolution,
-  //     transparent: true,
-  //     blending: THREE.AdditiveBlending,
-  //     depthWrite: false,
-  //     vertexColors: true,
-  //   });
-  //particleMaterial = createMetaballShaderMaterial();
   const textureLoader = new THREE.TextureLoader();
   const sprite = textureLoader.load(
     "https://threejs.org/examples/textures/sprites/disc.png"
@@ -165,73 +231,6 @@ function createParticleSystem() {
   scene.add(particleSystem);
 }
 
-function createMetaballShaderMaterial() {
-  const vertexShader = `
-      varying vec2 vUv;
-      void main() {
-        vUv = uv;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-      }
-    `;
-
-  const fragmentShader = `
-  uniform vec3 color;
-  uniform float opacity;
-  varying vec2 vUv;
-
-  void main() {
-    vec2 p = vUv * 2.0 - 1.0;
-    float d = dot(p, p);
-    float alpha = 1.0 - smoothstep(0.0, 0.5, d);
-    gl_FragColor = vec4(color, alpha * opacity);
-  }
-`;
-
-  const shaderMaterial = new THREE.ShaderMaterial({
-    uniforms: {
-      color: { value: new THREE.Color(0xffffff) },
-      opacity: { value: 1 },
-    },
-    vertexShader: vertexShader,
-    fragmentShader: fragmentShader,
-    transparent: true,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-    side: THREE.DoubleSide, // Add this line
-  });
-
-  return shaderMaterial;
-}
-
-function createBlobTexture() {
-  const canvas = document.createElement("canvas");
-  const context = canvas.getContext("2d");
-  const size = 128;
-
-  canvas.width = size;
-  canvas.height = size;
-
-  const gradient = context.createRadialGradient(
-    size / 2,
-    size / 2,
-    0,
-    size / 2,
-    size / 2,
-    size / 2
-  );
-  gradient.addColorStop(0, "rgba(255, 255, 255, 1)");
-  gradient.addColorStop(0.4, "rgba(255, 255, 255, 0.5)");
-  gradient.addColorStop(1, "rgba(255, 255, 255, 0)");
-
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, size, size);
-
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.needsUpdate = true;
-
-  return texture;
-}
-
 // Get the time of day as a normalized value between 0 and 1
 function getTimeOfDay() {
   const now = new Date();
@@ -239,19 +238,6 @@ function getTimeOfDay() {
     now.getHours() * 60 * 60 + now.getMinutes() * 60 + now.getSeconds();
   return currentTime / (24 * 60 * 60);
 }
-
-// Color palettes for day and night
-const dayPalette = [
-  new THREE.Color(0xff9f00), // Orange
-  new THREE.Color(0xff5200), // Darker orange
-  new THREE.Color(0xff2600), // Red-orange
-];
-
-const nightPalette = [
-  new THREE.Color(0x5432ff), // Blue
-  new THREE.Color(0x3200ff), // Darker blue
-  new THREE.Color(0x8b32ff), // Purple
-];
 
 // Animation loop
 function animate() {
@@ -286,19 +272,19 @@ function animate() {
   const timeOfDay = getTimeOfDay();
   const currentTime = new Date();
   const timeString = currentTime.toLocaleTimeString();
-  const palette = timeOfDay < 0.5 ? dayPalette : nightPalette;
-  const paletteString = palette
-    .map((color) => {
-      return `rgb(${Math.round(color.r * 255)}, ${Math.round(
-        color.g * 255
-      )}, ${Math.round(color.b * 255)})`;
-    })
-    .join(", ");
 
-  const paletteBox = document.getElementById("palette-box");
-  paletteBox.style.backgroundColor = `rgb(${Math.round(
+  const paletteBoxA = document.getElementById("palette-box-a");
+  paletteBoxA.style.backgroundColor = `rgb(${Math.round(
+    palette[0].r * 255
+  )}, ${Math.round(palette[0].g * 255)}, ${Math.round(palette[0].b * 255)})`;
+  const paletteBoxB = document.getElementById("palette-box-b");
+  paletteBoxB.style.backgroundColor = `rgb(${Math.round(
     palette[1].r * 255
   )}, ${Math.round(palette[1].g * 255)}, ${Math.round(palette[1].b * 255)})`;
+  const paletteBoxC = document.getElementById("palette-box-c");
+  paletteBoxC.style.backgroundColor = `rgb(${Math.round(
+    palette[2].r * 255
+  )}, ${Math.round(palette[2].g * 255)}, ${Math.round(palette[2].b * 255)})`;
 
   document.getElementById("time-info").textContent = `Time: ${timeString}`;
 
@@ -337,14 +323,13 @@ function animate() {
       }
 
       // Update particle color based on distance and time
-      const t = Math.sin(performance.now() * 0.001) * 0.5 + 0.5;
+      const t = particle.distanceTo(mousePos) / grabDistance;
       const color = palette[0]
         .clone()
         .lerp(palette[1], t)
         .lerp(palette[2], distance / grabDistance);
       colors[i] = color.r;
       colors[i + 1] = color.g;
-      colors[i + 2] = color.b;
       colors[i + 2] = color.b;
     } else {
       particle.lerp(initialPosition, 0.05);
