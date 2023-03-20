@@ -1,0 +1,69 @@
+@font-face {
+  font-family: "Mplus";
+  src: url("fonts/mplusone/MPLUS1Code-Bold.ttf") format("ttf");
+  font-weight: 700;
+  font-style: bold;
+}
+
+@font-face {
+  font-family: "Mplus";
+  src: url("fonts/mplusone/MPLUS1Code-Regular.ttf") format("ttf");
+  font-weight: 300;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  font-family: "Mplus", monospace;
+}
+
+#container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#drawer {
+  position: fixed;
+  top: 0;
+  right: -210px; /* Hide drawer initially */
+  width: auto;
+  height: 100%;
+  background-color: rgba(32, 32, 32, 0.9);
+  color: white;
+  transition: right 0.5s;
+  z-index: 1000;
+}
+
+#drawer.open {
+  right: 0;
+}
+
+#controls {
+  margin: 10px;
+  display: flex;
+  flex-flow: column;
+}
+
+#toggleDrawer {
+  position: absolute;
+  top: 50%;
+  left: -30px;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  background-color: rgba(32, 32, 32, 0.9);
+  color: white;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+#toggleDrawer:hover {
+  background-color: rgba(32, 32, 32, 1);
+}
