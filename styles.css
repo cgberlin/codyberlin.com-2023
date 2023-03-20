@@ -67,3 +67,42 @@ body {
 #toggleDrawer:hover {
   background-color: rgba(32, 32, 32, 1);
 }
+
+@media screen and (max-width: 600px) {
+  #aboutMe {
+    top: 10px;
+    left: 0px;
+    right: 0px;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+  }
+  #aboutMe > div {
+    text-align: center;
+  }
+  #socialLinks {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+  #info-container {
+    bottom: 10px;
+    left: 0px;
+    right: 0px;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+  }
+  #info-container > div {
+    text-align: center;
+  }
+  #timeContainer {
+    display: flex;
+    flex-flow: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+}
