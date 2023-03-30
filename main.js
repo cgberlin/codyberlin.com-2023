@@ -1,12 +1,12 @@
 // controllables
-let particleCount = 100000,
-  particleResolution = 0.015,
-  grabDistance = window.innerWidth <= 768 ? 0.75 : 0.5;
+let particleCount = window.innerWidth <= 768 ? 50000 : 100000,
+  particleResolution = window.innerWidth <= 768 ? 0.02 : 0.015,
+  grabDistance = window.innerWidth <= 768 ? 0.6 : 0.5;
 let orbitSpeed = 0.03;
 let spiralInwardSpeed = 10;
 const ejectDistance = 2.1;
 const ejectForce = 0.05;
-const minDistanceToCamera = 2;
+const minDistanceToCamera = window.innerWidth <= 768 ? 2 : 2;
 
 // Variables
 let scene, camera, renderer, geometry, material, mesh;
@@ -47,11 +47,6 @@ const palettes = [
     new THREE.Color(0xffcc33),
   ],
   [
-    new THREE.Color(0x00bfff),
-    new THREE.Color(0x006699),
-    new THREE.Color(0x66ccff),
-  ],
-  [
     new THREE.Color(0x6600ff),
     new THREE.Color(0xff00ff),
     new THREE.Color(0xff33cc),
@@ -65,11 +60,6 @@ const palettes = [
     new THREE.Color(0xff0000),
     new THREE.Color(0xffff00),
     new THREE.Color(0x00ff00),
-  ],
-  [
-    new THREE.Color(0x00ff00),
-    new THREE.Color(0xff0000),
-    new THREE.Color(0x0000ff),
   ],
   [
     new THREE.Color(0xff0000),
@@ -245,7 +235,7 @@ function animate() {
 
   particleSystem.rotation.x += 0.001;
   particleSystem.rotation.y += 0.001;
-  particleSystem.rotation.z += 0.001;
+  //particleSystem.rotation.z += 0.001;
   const colors = particles.attributes.color.array;
   const positions = particles.attributes.position.array;
 

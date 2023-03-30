@@ -68,10 +68,10 @@ body {
   background-color: rgba(32, 32, 32, 1);
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 745px) {
   #aboutMe {
     top: 30px;
-    left: 0px;
+    left: 0px !important;
     right: 0px;
     display: flex;
     flex-flow: column;
